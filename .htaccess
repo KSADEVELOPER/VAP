@@ -1,0 +1,894 @@
+# # Analytics Platform - Apache Configuration
+# # منصة تحليل الزوار - إعدادات Apache
+
+# # Enable URL Rewriting
+# RewriteEngine On
+
+# # Force HTTPS (إجبار HTTPS)
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# # Remove www from domain (إزالة www من النطاق)
+# RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
+# RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+
+# # Security Headers (رؤوس الأمان)
+# <IfModule mod_headers.c>
+#     # Prevent clickjacking (منع الاختطاف)
+#     Header always append X-Frame-Options SAMEORIGIN
+    
+#     # XSS Protection (حماية من XSS)
+#     Header set X-XSS-Protection "1; mode=block"
+    
+#     # Content Type Options (خيارات نوع المحتوى)
+#     Header set X-Content-Type-Options nosniff
+    
+#     # Referrer Policy (سياسة المرجع)
+#     Header set Referrer-Policy "strict-origin-when-cross-origin"
+    
+#     # Content Security Policy (سياسة أمان المحتوى)
+#     Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'"
+    
+#     # HSTS (HTTP Strict Transport Security)
+#     Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    
+#     # Powered by header (إخفاء معلومات الخادم)
+#     Header unset X-Powered-By
+#     Header unset Server
+# </IfModule>
+
+# # Hide Server Information (إخفاء معلومات الخادم)
+# <IfModule mod_security.c>
+#     SecServerSignature Off
+#     SecRuleEngine Off
+# </IfModule>
+
+# # File Compression (ضغط الملفات)
+# <IfModule mod_deflate.c>
+#     AddOutputFilterByType DEFLATE text/plain
+#     AddOutputFilterByType DEFLATE text/html
+#     AddOutputFilterByType DEFLATE text/xml
+#     AddOutputFilterByType DEFLATE text/css
+#     AddOutputFilterByType DEFLATE text/javascript
+#     AddOutputFilterByType DEFLATE application/xml
+#     AddOutputFilterByType DEFLATE application/xhtml+xml
+#     AddOutputFilterByType DEFLATE application/rss+xml
+#     AddOutputFilterByType DEFLATE application/javascript
+#     AddOutputFilterByType DEFLATE application/x-javascript
+#     AddOutputFilterByType DEFLATE application/json
+#     AddOutputFilterByType DEFLATE application/manifest+json
+#     AddOutputFilterByType DEFLATE image/svg+xml
+    
+#     # Compress fonts
+#     AddOutputFilterByType DEFLATE font/woff
+#     AddOutputFilterByType DEFLATE font/woff2
+#     AddOutputFilterByType DEFLATE application/font-woff
+#     AddOutputFilterByType DEFLATE application/font-woff2
+#     AddOutputFilterByType DEFLATE application/vnd.ms-fontobject
+#     AddOutputFilterByType DEFLATE font/ttf
+#     AddOutputFilterByType DEFLATE font/otf
+# </IfModule>
+
+# # Browser Caching (التخزين المؤقت للمتصفح)
+# <IfModule mod_expires.c>
+#     ExpiresActive On
+    
+#     # Images (الصور)
+#     ExpiresByType image/jpg "access plus 1 month"
+#     ExpiresByType image/jpeg "access plus 1 month"
+#     ExpiresByType image/gif "access plus 1 month"
+#     ExpiresByType image/png "access plus 1 month"
+#     ExpiresByType image/webp "access plus 1 month"
+#     ExpiresByType image/svg+xml "access plus 1 month"
+#     ExpiresByType image/x-icon "access plus 1 year"
+#     ExpiresByType image/vnd.microsoft.icon "access plus 1 year"
+#     ExpiresByType image/ico "access plus 1 year"
+    
+#     # CSS and JavaScript (CSS و JavaScript)
+#     ExpiresByType text/css "access plus 1 month"
+#     ExpiresByType application/javascript "access plus 1 month"
+#     ExpiresByType text/javascript "access plus 1 month"
+#     ExpiresByType application/x-javascript "access plus 1 month"
+    
+#     # Fonts (الخطوط)
+#     ExpiresByType font/woff "access plus 1 year"
+#     ExpiresByType font/woff2 "access plus 1 year"
+#     ExpiresByType application/font-woff "access plus 1 year"
+#     ExpiresByType application/font-woff2 "access plus 1 year"
+#     ExpiresByType application/vnd.ms-fontobject "access plus 1 year"
+#     ExpiresByType font/ttf "access plus 1 year"
+#     ExpiresByType font/otf "access plus 1 year"
+    
+#     # HTML (HTML)
+#     ExpiresByType text/html "access plus 1 hour"
+    
+#     # XML and JSON (XML و JSON)
+#     ExpiresByType application/xml "access plus 1 hour"
+#     ExpiresByType application/json "access plus 1 hour"
+#     ExpiresByType text/xml "access plus 1 hour"
+    
+#     # Media files (ملفات الوسائط)
+#     ExpiresByType video/mp4 "access plus 1 month"
+#     ExpiresByType video/webm "access plus 1 month"
+#     ExpiresByType audio/mp3 "access plus 1 month"
+#     ExpiresByType audio/wav "access plus 1 month"
+    
+#     # Documents (المستندات)
+#     ExpiresByType application/pdf "access plus 1 month"
+#     ExpiresByType application/msword "access plus 1 month"
+#     ExpiresByType application/vnd.ms-excel "access plus 1 month"
+    
+#     # Default (افتراضي)
+#     ExpiresDefault "access plus 1 day"
+# </IfModule>
+
+# # Cache Control Headers (رؤوس التحكم في التخزين المؤقت)
+# <IfModule mod_headers.c>
+#     # Static resources (الموارد الثابتة)
+#     <FilesMatch "\.(css|js|png|jpg|jpeg|gif|webp|svg|woff|woff2|ttf|eot|ico)$">
+#         Header set Cache-Control "public, max-age=2592000, immutable"
+#         Header set Vary "Accept-Encoding"
+#     </FilesMatch>
+    
+#     # HTML files (ملفات HTML)
+#     <FilesMatch "\.(html|htm)$">
+#         Header set Cache-Control "public, max-age=3600, must-revalidate"
+#         Header set Vary "Accept-Encoding"
+#     </FilesMatch>
+    
+#     # PHP files (ملفات PHP)
+#     <FilesMatch "\.php$">
+#         Header set Cache-Control "private, no-cache, no-store, must-revalidate"
+#         Header set Pragma "no-cache"
+#         Header set Expires 0
+#     </FilesMatch>
+    
+#     # JSON and API responses (استجابات JSON و API)
+#     <FilesMatch "\.(json)$">
+#         Header set Cache-Control "public, max-age=300"
+#         Header set Content-Type "application/json; charset=utf-8"
+#     </FilesMatch>
+# </IfModule>
+
+# # Protect sensitive files (حماية الملفات الحساسة)
+# <FilesMatch "(^#.*#|\.(bak|config|dist|fla|inc|ini|log|psd|sh|sql|sw[op])|~)$">
+#     Require all denied
+# </FilesMatch>
+
+# # Protect configuration files (حماية ملفات التكوين)
+# <Files "config/database.php">
+#     Require all denied
+# </Files>
+
+# <Files "config/app.php">
+#     Require all denied
+# </Files>
+
+# # Protect .htaccess file (حماية ملف .htaccess)
+# <Files ".htaccess">
+#     Require all denied
+# </Files>
+
+# # Protect composer files (حماية ملفات composer)
+# <FilesMatch "^(composer\.(json|lock)|package\.json|\.git.*|\.env.*|yarn\.lock)">
+#     Require all denied
+# </FilesMatch>
+
+# # Block access to PHP error logs (حظر الوصول لملفات سجلات أخطاء PHP)
+# <FilesMatch "(error_log|debug\.log|access\.log)">
+#     Require all denied
+# </FilesMatch>
+
+# # Protect classes directory (حماية مجلد الفئات)
+# <Directory "classes">
+#     Require all denied
+# </Directory>
+
+# # Protect storage directory (حماية مجلد التخزين)
+# <Directory "storage">
+#     <FilesMatch "\.php$">
+#         Require all denied
+#     </FilesMatch>
+# </Directory>
+
+# # Protect uploads directory from PHP execution (منع تنفيذ PHP في مجلد التحميلات)
+# <Directory "uploads">
+#     <FilesMatch "\.php$">
+#         Require all denied
+#     </FilesMatch>
+#     php_flag engine off
+# </Directory>
+
+# # Limit file upload size (تحديد حجم تحميل الملفات)
+# LimitRequestBody 52428800
+
+# # Disable directory browsing (تعطيل تصفح المجلدات)
+# Options -Indexes -ExecCGI -Includes
+# Options +FollowSymLinks
+
+# # Default character set (ترميز الأحرف الافتراضي)
+# AddDefaultCharset UTF-8
+
+# # Custom Error Pages (صفحات الأخطاء المخصصة)
+# ErrorDocument 400 /error.php?code=400
+# ErrorDocument 401 /error.php?code=401
+# ErrorDocument 403 /error.php?code=403
+# ErrorDocument 404 /error.php?code=404
+# ErrorDocument 500 /error.php?code=500
+# ErrorDocument 502 /error.php?code=502
+# ErrorDocument 503 /error.php?code=503
+
+# # API CORS Headers (رؤوس CORS لـ API)
+# <IfModule mod_headers.c>
+#     # Allow CORS for API endpoints (السماح بـ CORS لنقاط API)
+#     <LocationMatch "^/api/">
+#         Header always set Access-Control-Allow-Origin "*"
+#         Header always set Access-Control-Allow-Methods "POST, GET, OPTIONS, PUT, DELETE"
+#         Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, Accept, Origin"
+#         Header always set Access-Control-Max-Age "86400"
+#         Header always set Access-Control-Allow-Credentials "false"
+#     </LocationMatch>
+    
+#     # Special handling for track.php (معالجة خاصة لملف track.php)
+#     <Files "track.php">
+#         Header always set Access-Control-Allow-Origin "*"
+#         Header always set Access-Control-Allow-Methods "POST, GET, OPTIONS"
+#         Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, Accept, Origin"
+#         Header always set Access-Control-Max-Age "86400"
+#         Header always set Access-Control-Allow-Credentials "false"
+#     </Files>
+# </IfModule>
+
+# # Handle preflight requests for CORS (معالجة طلبات preflight لـ CORS)
+# RewriteCond %{REQUEST_METHOD} OPTIONS
+# RewriteRule ^api/(.*)$ api/track.php [L]
+
+# # Pretty URLs (روابط جميلة)
+# RewriteRule ^dashboard/?$ dashboard.php [L,QSA]
+# RewriteRule ^admin/?$ admin/index.php [L,QSA]
+# RewriteRule ^login/?$ login.php [L,QSA]
+# RewriteRule ^register/?$ login.php [L,QSA]
+# RewriteRule ^analytics/([0-9]+)/?$ website-analytics.php?id=$1 [L,QSA]
+# RewriteRule ^activate/([a-zA-Z0-9]+)/?$ activate.php?token=$1 [L,QSA]
+# RewriteRule ^reset/([a-zA-Z0-9]+)/?$ reset-password.php?token=$1 [L,QSA]
+
+# # Block malicious requests (حظر الطلبات الضارة)
+# <IfModule mod_rewrite.c>
+#     # Block SQL injection attempts (حظر محاولات SQL injection)
+#     RewriteCond %{QUERY_STRING} [^a-z]?(union|select|insert|drop|delete|update|cast|create|char|convert|alter|declare|exec|script|eval)[\s\[\(]+ [NC]
+#     RewriteRule ^(.*)$ - [F,L]
+    
+#     # Block XSS attempts (حظر محاولات XSS)
+#     RewriteCond %{QUERY_STRING} (<|%3C)([^s]*s)+cript.*(>|%3E) [NC,OR]
+#     RewriteCond %{QUERY_STRING} (\<|%3C)([^e]*e)+mbed.*(>|%3E) [NC,OR]
+#     RewriteCond %{QUERY_STRING} (\<|%3C)([^o]*o)+bject.*(>|%3E) [NC,OR]
+#     RewriteCond %{QUERY_STRING} (\<|%3C)([^i]*i)+frame.*(>|%3E) [NC,OR]
+#     RewriteCond %{QUERY_STRING} base64_(en|de)code[^(]*\([^)]*\) [NC,OR]
+#     RewriteCond %{QUERY_STRING} javascript:([^;]*;)+ [NC,OR]
+#     RewriteCond %{QUERY_STRING} (alert|confirm|prompt)\s*\( [NC]
+#     RewriteRule ^(.*)$ - [F,L]
+    
+#     # Block file injection attempts (حظر محاولات حقن الملفات)
+#     RewriteCond %{QUERY_STRING} \.\.\/ [NC,OR]
+#     RewriteCond %{QUERY_STRING} \.(bash|git|hg|log|svn|swp|cvs) [NC,OR]
+#     RewriteCond %{QUERY_STRING} file_get_contents [NC,OR]
+#     RewriteCond %{QUERY_STRING} (etc\/passwd|etc\/hosts) [NC]
+#     RewriteRule ^(.*)$ - [F,L]
+    
+#     # Block bad user agents (حظر وكلاء المستخدم السيئين)
+#     RewriteCond %{HTTP_USER_AGENT} ^$ [OR]
+#     RewriteCond %{HTTP_USER_AGENT} (casper|cmsworldmap|diavol|dotbot|feedfinder|flicky|ia_archiver|kmccrew|nutch|planetwork|purebot|pycurl|skygrid|sucker|turnit|vikspider|zmeu) [NC]
+#     RewriteRule ^(.*)$ - [F,L]
+    
+#     # Block suspicious URLs (حظر الروابط المشبوهة)
+#     RewriteCond %{REQUEST_URI} (wp-|wordpress|admin|phpmyadmin|cpanel|webmail) [NC]
+#     RewriteRule ^(.*)$ - [F,L]
+    
+#     # Block request methods (حظر طرق الطلب غير المرغوبة)
+#     RewriteCond %{REQUEST_METHOD} ^(HEAD|TRACE|DELETE|TRACK|DEBUG) [NC]
+#     RewriteRule ^(.*)$ - [F,L]
+    
+#     # Block proxy requests (حظر طلبات البروكسي)
+#     RewriteCond %{HTTP:Via} !^$ [OR]
+#     RewriteCond %{HTTP:X-Forwarded-For} !^$
+#     RewriteCond %{HTTP:X-Forwarded-For} !^127\.0\.0\.1$
+#     RewriteRule ^(.*)$ - [F,L]
+# </IfModule>
+
+# # Rate limiting using mod_evasive (تحديد معدل الطلبات)
+# <IfModule mod_evasive24.c>
+#     DOSHashTableSize    3000
+#     DOSPageCount        5
+#     DOSPageInterval     1
+#     DOSSiteCount        100
+#     DOSSiteInterval     1
+#     DOSBlockingPeriod   86400
+#     DOSLogDir           "/var/log/apache2/evasive"
+#     DOSEmailNotify      admin@analytics-platform.com
+#     DOSWhitelist        127.0.0.1
+#     DOSWhitelist        ::1
+# </IfModule>
+
+# # Hotlink protection (حماية من الربط المباشر)
+# <IfModule mod_rewrite.c>
+#     RewriteCond %{HTTP_REFERER} !^$
+#     RewriteCond %{HTTP_REFERER} !^https?://(www\.)?ztest\.info [NC]
+#     RewriteCond %{HTTP_REFERER} !^https?://(www\.)?ztest\.info [NC]
+#     RewriteCond %{REQUEST_URI} \.(gif|jpg|jpeg|png|webp|bmp|svg)$ [NC]
+#     RewriteRule ^(.*)$ /assets/images/no-hotlink.png [R=302,L]
+# </IfModule>
+
+# # Favicon handling (معالجة الأيقونة المفضلة)
+# <IfModule mod_rewrite.c>
+#     RewriteRule ^favicon\.ico$ /assets/images/favicon.ico [L]
+#     RewriteRule ^apple-touch-icon\.png$ /assets/images/apple-touch-icon.png [L]
+# </IfModule>
+
+# # PHP Configuration (إعدادات PHP)
+# <IfModule mod_php.c>
+#     # Security settings (إعدادات الأمان)
+#     php_flag expose_php Off
+#     php_flag allow_url_include Off
+#     php_flag allow_url_fopen Off
+#     php_flag register_globals Off
+#     php_flag magic_quotes_gpc Off
+#     php_flag auto_globals_jit On
+    
+#     # Performance settings (إعدادات الأداء)
+#     php_value max_execution_time 30
+#     php_value max_input_time 60
+#     php_value memory_limit 128M
+#     php_value post_max_size 10M
+#     php_value upload_max_filesize 5M
+#     php_value max_file_uploads 20
+    
+#     # Session settings (إعدادات الجلسة)
+#     php_value session.cookie_httponly 1
+#     php_value session.cookie_secure 1
+#     php_value session.use_only_cookies 1
+#     php_value session.cookie_samesite Strict
+#     php_value session.gc_maxlifetime 7200
+#     php_value session.gc_probability 1
+#     php_value session.gc_divisor 100
+    
+#     # Error handling (معالجة الأخطاء)
+#     php_flag display_errors Off
+#     php_flag display_startup_errors Off
+#     php_flag log_errors On
+#     php_value error_log /var/log/php_errors.log
+#     php_value log_errors_max_len 1024
+    
+#     # Time zone (المنطقة الزمنية)
+#     php_value date.timezone "Asia/Riyadh"
+    
+#     # Output buffering (التخزين المؤقت للمخرجات)
+#     php_flag output_buffering On
+#     php_value output_buffer_size 4096
+    
+#     # Zlib compression (ضغط Zlib)
+#     php_flag zlib.output_compression On
+#     php_value zlib.output_compression_level 6
+# </IfModule>
+
+# # Database backup protection (حماية النسخ الاحتياطية)
+# <FilesMatch "\.(sql|db|backup|dump)$">
+#     Require all denied
+# </FilesMatch>
+
+# # Log file protection (حماية ملفات السجلات)
+# <FilesMatch "\.(log|logs)$">
+#     Require all denied
+# </FilesMatch>
+
+# # Block access to version control files (حظر الوصول لملفات التحكم في الإصدار)
+# <FilesMatch "^\.">
+#     Require all denied
+# </FilesMatch>
+
+# # Prevent access to include files (منع الوصول لملفات التضمين)
+# <FilesMatch "\.(inc|include)$">
+#     Require all denied
+# </FilesMatch>
+
+# # Security for admin directory (أمان مجلد الإدارة)
+# <Directory "admin">
+#     # Additional protection for admin area
+#     # حماية إضافية لمنطقة الإدارة
+#     AuthType Basic
+#     AuthName "Admin Area"
+    
+#     # Uncomment and set path to password file
+#     # قم بإلغاء التعليق وتحديد مسار ملف كلمات المرور
+#     # AuthUserFile /path/to/.htpasswd
+    
+#     # Require valid user for basic auth (optional)
+#     # طلب مستخدم صحيح للمصادقة الأساسية (اختياري)
+#     # Require valid-user
+    
+#     # Allow specific IPs (recommended)
+#     # السماح لعناوين IP محددة (موصى به)
+#     <RequireAll>
+#         Require ip 127.0.0.1
+#         Require ip ::1
+#         # Add your trusted IP addresses here
+#         # أضف عناوين IP الموثوقة هنا
+#         # Require ip 192.168.1.0/24
+#         # Require ip 10.0.0.0/8
+#     </RequireAll>
+# </Directory>
+
+# # Custom MIME types (أنواع MIME المخصصة)
+# <IfModule mod_mime.c>
+#     AddType application/javascript .js
+#     AddType text/css .css
+#     AddType image/webp .webp
+#     AddType font/woff .woff
+#     AddType font/woff2 .woff2
+#     AddType application/json .json
+#     AddType application/manifest+json .webmanifest
+#     AddType text/cache-manifest .appcache
+#     AddType image/svg+xml .svg
+#     AddType application/xml .xml
+#     AddType text/xml .xml
+# </IfModule>
+
+# # ETags (علامات الكيان)
+# <IfModule mod_headers.c>
+#     Header unset ETag
+# </IfModule>
+# FileETag None
+
+# # Redirect trailing slashes (إعادة توجيه الشرطات المائلة النهائية)
+# <IfModule mod_rewrite.c>
+#     RewriteCond %{REQUEST_FILENAME} !-d
+#     RewriteCond %{REQUEST_URI} (.+)/$
+#     RewriteRule ^(.+)/$ /$1 [R=301,L]
+# </IfModule>
+
+# # Force lowercase URLs (إجبار الروابط على الأحرف الصغيرة)
+# <IfModule mod_rewrite.c>
+#     RewriteCond %{REQUEST_URI} [A-Z]
+#     RewriteRule (.*) ${lowercase:$1} [R=301,L]
+# </IfModule>
+
+# # Environment variables (متغيرات البيئة)
+# SetEnv TZ Asia/Riyadh
+# SetEnv SERVER_ADMIN admin@analytics-platform.com
+
+# # Performance monitoring (مراقبة الأداء)
+# <IfModule mod_status.c>
+#     <Location "/server-status">
+#         SetHandler server-status
+#         Require ip 127.0.0.1
+#         Require ip ::1
+#         # Add admin IP addresses
+#         # أضف عناوين IP الإدارة
+#     </Location>
+    
+#     <Location "/server-info">
+#         SetHandler server-info
+#         Require ip 127.0.0.1
+#         Require ip ::1
+#     </Location>
+# </IfModule>
+
+# # Custom headers for API responses (رؤوس مخصصة لاستجابات API)
+# <LocationMatch "^/api/">
+#     Header set X-API-Version "1.0"
+#     Header set X-Rate-Limit "1000"
+#     Header set X-Rate-Limit-Window "3600"
+#     Header set X-Content-Type-Options "nosniff"
+# </LocationMatch>
+
+# # Backup and temporary file protection (حماية ملفات النسخ الاحتياطي والمؤقتة)
+# <FilesMatch "(^|/)\.(htaccess|htpasswd|DS_Store)|~$|\.tmp$|\.bak$">
+#     Require all denied
+# </FilesMatch>
+
+# # Maintenance mode (وضع الصيانة)
+# # Uncomment the lines below to enable maintenance mode
+# # قم بإلغاء التعليق للأسطر التالية لتفعيل وضع الصيانة
+# <IfModule mod_rewrite.c>
+#     # RewriteCond %{REQUEST_URI} !/maintenance.html$
+#     # RewriteCond %{REQUEST_URI} !/assets/
+#     # RewriteCond %{REQUEST_URI} !/api/
+#     # RewriteCond %{REMOTE_ADDR} !^127\.0\.0\.1$
+#     # RewriteCond %{REMOTE_ADDR} !^192\.168\.1\.
+#     # RewriteRule $ /maintenance.html [R=503,L]
+#     # Header always set Retry-After "3600"
+# </IfModule>
+
+# # Minification (تصغير الملفات)
+# <IfModule mod_rewrite.c>
+#     # Auto-minify CSS and JS if minified versions exist
+#     # تصغير تلقائي لـ CSS و JS إذا كانت الإصدارات المصغرة موجودة
+#     RewriteCond %{REQUEST_FILENAME} !-f
+#     RewriteCond %{REQUEST_URI} ^(.+)\.css$
+#     RewriteCond %{DOCUMENT_ROOT}%1\.min\.css -f
+#     RewriteRule ^(.+)\.css$ $1.min.css [L]
+    
+#     RewriteCond %{REQUEST_FILENAME} !-f
+#     RewriteCond %{REQUEST_URI} ^(.+)\.js$
+#     RewriteCond %{DOCUMENT_ROOT}%1\.min\.js -f
+#     RewriteRule ^(.+)\.js$ $1.min.js [L]
+# </IfModule>
+
+# # Final security headers (رؤوس الأمان النهائية)
+# <IfModule mod_headers.c>
+#     Header always set X-Robots-Tag "index, follow"
+#     Header always set X-Download-Options "noopen"
+#     Header always set X-Permitted-Cross-Domain-Policies "none"
+#     Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+#     Header always set Feature-Policy "geolocation 'none'; microphone 'none'; camera 'none'"
+# </IfModule>
+
+# # Redirect old URLs and common attacks (إعادة توجيه الروابط القديمة والهجمات الشائعة)
+# <IfModule mod_rewrite.c>
+#     # Redirect common attack URLs
+#     RewriteRule ^(wp-admin|wp-login|wordpress|admin|phpmyadmin)/?$ / [R=301,L]
+    
+#     # Block common bot requests
+#     RewriteCond %{HTTP_USER_AGENT} (bot|crawler|spider|scraper) [NC]
+#     RewriteCond %{HTTP_USER_AGENT} !(googlebot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|facebookexternalhit|twitterbot|linkedinbot|whatsapp) [NC]
+#     RewriteRule ^(.*)$ - [F,L]
+# </IfModule>
+
+# # SSL Configuration (إعدادات SSL)
+# <IfModule mod_ssl.c>
+#     SSLProtocol -all +TLSv1.2 +TLSv1.3
+#     SSLCipherSuite ECDHE+AESGCM:ECDHE+CHACHA20:DHE+AESGCM:DHE+CHACHA20:!aNULL:!MD5:!DSS
+#     SSLHonorCipherOrder On
+#     SSLCompression Off
+#     SSLUseStapling On
+#     SSLStaplingCache "shmcb:logs/stapling-cache(150000)"
+# </IfModule>
+
+# # END Analytics Platform Configuration
+# # نهاية إعدادات منصة التحليلات/json
+# </IfModule>
+
+# # Browser Caching (التخزين المؤقت للمتصفح)
+# <IfModule mod_expires.c>
+#     ExpiresActive On
+    
+#     # Images (الصور)
+#     ExpiresByType image/jpg "access plus 1 month"
+#     ExpiresByType image/jpeg "access plus 1 month"
+#     ExpiresByType image/gif "access plus 1 month"
+#     ExpiresByType image/png "access plus 1 month"
+#     ExpiresByType image/webp "access plus 1 month"
+#     ExpiresByType image/svg+xml "access plus 1 month"
+#     ExpiresByType image/x-icon "access plus 1 year"
+    
+#     # CSS and JavaScript (CSS و JavaScript)
+#     ExpiresByType text/css "access plus 1 month"
+#     ExpiresByType application/javascript "access plus 1 month"
+#     ExpiresByType text/javascript "access plus 1 month"
+    
+#     # Fonts (الخطوط)
+#     ExpiresByType font/woff "access plus 1 year"
+#     ExpiresByType font/woff2 "access plus 1 year"
+#     ExpiresByType application/font-woff "access plus 1 year"
+#     ExpiresByType application/font-woff2 "access plus 1 year"
+    
+#     # HTML (HTML)
+#     ExpiresByType text/html "access plus 1 hour"
+    
+#     # XML and JSON (XML و JSON)
+#     ExpiresByType application/xml "access plus 1 hour"
+#     ExpiresByType application/json "access plus 1 hour"
+# </IfModule>
+
+# # Cache Control Headers (رؤوس التحكم في التخزين المؤقت)
+# <IfModule mod_headers.c>
+#     # Static resources (الموارد الثابتة)
+#     <FilesMatch "\.(css|js|png|jpg|jpeg|gif|webp|svg|woff|woff2|ttf|eot)$">
+#         Header set Cache-Control "public, max-age=2592000"
+#     </FilesMatch>
+    
+#     # HTML files (ملفات HTML)
+#     <FilesMatch "\.(html|htm)$">
+#         Header set Cache-Control "public, max-age=3600"
+#     </FilesMatch>
+    
+#     # PHP files (ملفات PHP)
+#     <FilesMatch "\.php$">
+#         Header set Cache-Control "private, no-cache, no-store, must-revalidate"
+#         Header set Pragma "no-cache"
+#         Header set Expires 0
+#     </FilesMatch>
+# </IfModule>
+
+# # Protect sensitive files (حماية الملفات الحساسة)
+# <FilesMatch "(^#.*#|\.(bak|config|dist|fla|inc|ini|log|psd|sh|sql|sw[op])|~)$">
+#     Order allow,deny
+#     Deny from all
+#     Satisfy All
+# </FilesMatch>
+
+# # Protect configuration files (حماية ملفات التكوين)
+# <Files "config/database.php">
+#     Order allow,deny
+#     Deny from all
+# </Files>
+
+# # Protect .htaccess file (حماية ملف .htaccess)
+# <Files ".htaccess">
+#     Order allow,deny
+#     Deny from all
+# </Files>
+
+# # Protect composer files (حماية ملفات composer)
+# <FilesMatch "^(composer\.(json|lock)|package\.json|\.git)">
+#     Order allow,deny
+#     Deny from all
+# </FilesMatch>
+
+# # Block access to PHP error logs (حظر الوصول لملفات سجلات أخطاء PHP)
+# <FilesMatch "error_log">
+#     Order allow,deny
+#     Deny from all
+# </FilesMatch>
+
+# # Limit file upload size (تحديد حجم تحميل الملفات)
+# LimitRequestBody 10485760
+
+# # Disable directory browsing (تعطيل تصفح المجلدات)
+# Options -Indexes
+
+# # Default character set (ترميز الأحرف الافتراضي)
+# AddDefaultCharset UTF-8
+
+# # Custom Error Pages (صفحات الأخطاء المخصصة)
+# ErrorDocument 400 /error.php?code=400
+# ErrorDocument 401 /error.php?code=401
+# ErrorDocument 403 /error.php?code=403
+# ErrorDocument 404 /error.php?code=404
+# ErrorDocument 500 /error.php?code=500
+
+# # API CORS Headers (رؤوس CORS لـ API)
+# <IfModule mod_headers.c>
+#     # Allow CORS for API endpoints (السماح بـ CORS لنقاط API)
+#     <Files "track.php">
+#         Header always set Access-Control-Allow-Origin "*"
+#     Header always set Access-Control-Allow-Methods "POST, GET, OPTIONS"
+#     Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, Accept, Origin"
+#         Header set Access-Control-Max-Age "86400"
+#     </Files>
+# </IfModule>
+
+# # Handle preflight requests (معالجة طلبات preflight)
+# RewriteCond %{REQUEST_METHOD} OPTIONS
+# RewriteRule ^api/(.*)$ api/track.php [L]
+
+# # Pretty URLs (روابط جميلة)
+# RewriteRule ^dashboard/?$ dashboard.php [L]
+# RewriteRule ^admin/?$ admin/index.php [L]
+# RewriteRule ^login/?$ login.php [L]
+# RewriteRule ^register/?$ login.php [L]
+
+# # Redirect old URLs (إعادة توجيه الروابط القديمة)
+# RedirectMatch 301 ^/old-path/(.*)$ /new-path/$1
+
+# # Rate limiting (تحديد معدل الطلبات)
+# <IfModule mod_evasive24.c>
+#     DOSHashTableSize    3000
+#     DOSPageCount        5
+#     DOSPageInterval     1
+#     DOSSiteCount        100
+#     DOSSiteInterval     1
+#     DOSBlockingPeriod   86400
+# </IfModule>
+
+# # PHP Configuration (إعدادات PHP)
+# <IfModule mod_php.c>
+#     # Security settings (إعدادات الأمان)
+#     php_flag expose_php Off
+#     php_flag allow_url_include Off
+#     php_flag allow_url_fopen Off
+#     php_flag register_globals Off
+#     php_flag magic_quotes_gpc Off
+    
+#     # Performance settings (إعدادات الأداء)
+#     php_value max_execution_time 30
+#     php_value max_input_time 60
+#     php_value memory_limit 128M
+#     php_value post_max_size 10M
+#     php_value upload_max_filesize 5M
+    
+#     # Session settings (إعدادات الجلسة)
+#     php_value session.cookie_httponly 1
+#     php_value session.cookie_secure 1
+#     php_value session.use_only_cookies 1
+#     php_value session.cookie_samesite Strict
+    
+#     # Error handling (معالجة الأخطاء)
+#     php_flag display_errors Off
+#     php_flag log_errors On
+#     php_value error_log /var/log/php_errors.log
+    
+#     # Time zone (المنطقة الزمنية)
+#     php_value date.timezone "Asia/Riyadh"
+# </IfModule>
+
+# # Block malicious requests (حظر الطلبات الضارة)
+# <IfModule mod_rewrite.c>
+#     # Block SQL injection attempts (حظر محاولات SQL injection)
+#     RewriteCond %{QUERY_STRING} [^a-z]?(union|select|insert|drop|delete|update|cast|create|char|convert|alter|declare|exec|script|eval)[\s\[\(]+ [NC]
+#     RewriteRule ^(.*)$ - [F,L]
+    
+#     # Block XSS attempts (حظر محاولات XSS)
+#     RewriteCond %{QUERY_STRING} (<|%3C)([^s]*s)+cript.*(>|%3E) [NC,OR]
+#     RewriteCond %{QUERY_STRING} (\<|%3C)([^e]*e)+mbed.*(>|%3E) [NC,OR]
+#     RewriteCond %{QUERY_STRING} (\<|%3C)([^o]*o)+bject.*(>|%3E) [NC,OR]
+#     RewriteCond %{QUERY_STRING} (\<|%3C)([^i]*i)+frame.*(>|%3E) [NC,OR]
+#     RewriteCond %{QUERY_STRING} base64_(en|de)code[^(]*\([^)]*\) [NC,OR]
+#     RewriteCond %{QUERY_STRING} javascript:([^;]*;)+ [NC,OR]
+#     RewriteCond %{QUERY_STRING} (alert|confirm|prompt)\s*\( [NC]
+#     RewriteRule ^(.*)$ - [F,L]
+    
+#     # Block file injection attempts (حظر محاولات حقن الملفات)
+#     RewriteCond %{QUERY_STRING} \.\.\/ [NC,OR]
+#     RewriteCond %{QUERY_STRING} \.(bash|git|hg|log|svn|swp|cvs) [NC,OR]
+#     RewriteCond %{QUERY_STRING} file_get_contents [NC,OR]
+#     RewriteCond %{QUERY_STRING} (etc\/passwd|etc\/hosts) [NC]
+#     RewriteRule ^(.*)$ - [F,L]
+    
+#     # Block bad user agents (حظر وكلاء المستخدم السيئين)
+#     RewriteCond %{HTTP_USER_AGENT} ^$ [OR]
+#     RewriteCond %{HTTP_USER_AGENT} (casper|cmsworldmap|diavol|dotbot|feedfinder|flicky|ia_archiver|kmccrew|nutch|planetwork|purebot|pycurl|skygrid|sucker|turnit|vikspider|zmeu) [NC]
+#     RewriteRule ^(.*)$ - [F,L]
+    
+#     # Block request methods (حظر طرق الطلب غير المرغوبة)
+#     RewriteCond %{REQUEST_METHOD} ^(HEAD|TRACE|DELETE|TRACK|DEBUG) [NC]
+#     RewriteRule ^(.*)$ - [F,L]
+# </IfModule>
+
+# # Hotlink protection (حماية من الربط المباشر)
+# <IfModule mod_rewrite.c>
+#     RewriteCond %{HTTP_REFERER} !^$
+#     RewriteCond %{HTTP_REFERER} !^https?://(www\.)?yourdomain\.com [NC]
+#     RewriteCond %{REQUEST_URI} \.(gif|jpg|jpeg|png|webp|bmp)$ [NC]
+#     RewriteRule ^(.*)$ /images/no-hotlink.png [R=302,L]
+# </IfModule>
+
+# # Favicon caching (تخزين مؤقت للأيقونة المفضلة)
+# <IfModule mod_rewrite.c>
+#     RewriteRule ^favicon\.ico$ /images/favicon.ico [L]
+# </IfModule>
+
+# # Maintenance mode (وضع الصيانة)
+# # Uncomment the lines below to enable maintenance mode
+# # قم بإلغاء التعليق للأسطر التالية لتفعيل وضع الصيانة
+# # <IfModule mod_rewrite.c>
+# #     RewriteCond %{REQUEST_URI} !/maintenance.html$
+# #     RewriteCond %{REQUEST_URI} !/css/
+# #     RewriteCond %{REQUEST_URI} !/js/
+# #     RewriteCond %{REQUEST_URI} !/images/
+# #     RewriteCond %{REMOTE_ADDR} !^123\.456\.789\.123$
+# #     RewriteRule $ /maintenance.html [R=302,L]
+# # </IfModule>
+
+# # Minification (تصغير الملفات)
+# <IfModule mod_rewrite.c>
+#     # Auto-minify CSS and JS if minified versions exist
+#     # تصغير تلقائي لـ CSS و JS إذا كانت الإصدارات المصغرة موجودة
+#     RewriteCond %{REQUEST_FILENAME} !-f
+#     RewriteCond %{REQUEST_URI} ^(.+)\.css$
+#     RewriteCond %{DOCUMENT_ROOT}%1\.min\.css -f
+#     RewriteRule ^(.+)\.css$ $1.min.css [L]
+    
+#     RewriteCond %{REQUEST_FILENAME} !-f
+#     RewriteCond %{REQUEST_URI} ^(.+)\.js$
+#     RewriteCond %{DOCUMENT_ROOT}%1\.min\.js -f
+#     RewriteRule ^(.+)\.js$ $1.min.js [L]
+# </IfModule>
+
+# # Database backup protection (حماية النسخ الاحتياطية)
+# <FilesMatch "\.(sql|db|backup)$">
+#     Order allow,deny
+#     Deny from all
+# </FilesMatch>
+
+# # Log file protection (حماية ملفات السجلات)
+# <FilesMatch "\.(log|logs)$">
+#     Order allow,deny
+#     Deny from all
+# </FilesMatch>
+
+# # Disable PHP execution in upload directories (تعطيل تنفيذ PHP في مجلدات التحميل)
+# <Directory "uploads">
+#     <FilesMatch "\.php$">
+#         Order allow,deny
+#         Deny from all
+#     </FilesMatch>
+# </Directory>
+
+# # Block access to version control files (حظر الوصول لملفات التحكم في الإصدار)
+# <FilesMatch "^\.">
+#     Order allow,deny
+#     Deny from all
+# </FilesMatch>
+
+# # Security for admin directory (أمان مجلد الإدارة)
+# <Directory "admin">
+#     # Additional protection for admin area
+#     # حماية إضافية لمنطقة الإدارة
+#     <RequireAll>
+#         Require ip 127.0.0.1
+#         # Add your trusted IP addresses here
+#         # أضف عناوين IP الموثوقة هنا
+#         # Require ip 192.168.1.0/24
+#     </RequireAll>
+# </Directory>
+
+# # Prevent access to config directory (منع الوصول لمجلد التكوين)
+# <Directory "config">
+#     Order allow,deny
+#     Deny from all
+# </Directory>
+
+# # Prevent access to classes directory (منع الوصول لمجلد الفئات)
+# <Directory "classes">
+#     Order allow,deny
+#     Deny from all
+# </Directory>
+
+# # Custom MIME types (أنواع MIME المخصصة)
+# <IfModule mod_mime.c>
+#     AddType application/javascript .js
+#     AddType text/css .css
+#     AddType image/webp .webp
+#     AddType font/woff .woff
+#     AddType font/woff2 .woff2
+#     AddType application/json .json
+#     AddType application/manifest+json .webmanifest
+# </IfModule>
+
+# # ETags (علامات الكيان)
+# <IfModule mod_headers.c>
+#     Header unset ETag
+# </IfModule>
+# FileETag None
+
+# # Redirect trailing slashes (إعادة توجيه الشرطات المائلة النهائية)
+# <IfModule mod_rewrite.c>
+#     RewriteCond %{REQUEST_FILENAME} !-d
+#     RewriteCond %{REQUEST_URI} (.+)/$
+#     RewriteRule ^(.+)/$ /$1 [R=301,L]
+# </IfModule>
+
+# # Environment variables (متغيرات البيئة)
+# SetEnv TZ Asia/Riyadh
+
+# # Performance monitoring (مراقبة الأداء)
+# <IfModule mod_status.c>
+#     <Location "/server-status">
+#         SetHandler server-status
+#         Require ip 127.0.0.1
+#         # Add admin IP addresses
+#         # أضف عناوين IP الإدارة
+#     </Location>
+# </IfModule>
+
+# # Custom headers for API responses (رؤوس مخصصة لاستجابات API)
+# <LocationMatch "^/api/">
+#     Header set X-API-Version "1.0"
+#     Header set X-Rate-Limit "1000"
+# </LocationMatch>
+
+# # Backup and temporary file protection (حماية ملفات النسخ الاحتياطي والمؤقتة)
+# <FilesMatch "(^|/)\.(htaccess|htpasswd|DS_Store)|~$">
+#     Order allow,deny
+#     Deny from all
+# </FilesMatch>
+
+# # Final security headers (رؤوس الأمان النهائية)
+# <IfModule mod_headers.c>
+#     Header always set X-Robots-Tag "noindex, nofollow"
+#     Header always set X-Download-Options "noopen"
+#     Header always set X-Permitted-Cross-Domain-Policies "none"
+# </IfModule>
+
+# # END Analytics Platform Configuration
+# # نهاية إعدادات منصة التحليلات
