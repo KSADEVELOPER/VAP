@@ -126,10 +126,171 @@ chmod 644 config/database.php
 <!-- ضع هذا الكود قبل إغلاق </head> -->
 <!-- Place this code before closing </head> tag -->
 <script>
-// سيتم توليد الكود تلقائياً حسب موقعك
-// Code will be automatically generated for your website
+(function() {
+    'use strict';
+
+    // Replace with the tracking code generated for your website from Dashboard
+    var TRACKING_CODE = 'AT_REPLACE_WITH_YOUR_CODE';
+    // Replace with your system base URL
+    var API_URL = 'https://your-domain.com/api/track.php';
+
+    var sessionId = 'session_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+    var startTime = Date.now();
+    var lastActivity = startTime;
+    var pageViews = 0;
+    var isTracking = true;
+
+    function sendData(endpoint, data) {
+        if (!isTracking) return;
+
+        var payload = Object.assign({}, data, {
+            tracking_code: TRACKING_CODE,
+            session_id: sessionId,
+            page_url: window.location.href,
+            page_title: document.title,
+            timestamp: Date.now(),
+            user_agent: navigator.userAgent,
+            screen_resolution: screen.width + 'x' + screen.height,
+            viewport_size: window.innerWidth + 'x' + window.innerHeight,
+            referrer: document.referrer || '',
+            language: navigator.language || 'en'
+        });
+
+        fetch(API_URL + '?action=' + endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify(payload),
+            mode: 'cors',
+            cache: 'no-cache'
+        }).catch(function(error) {
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                console.warn('Analytics tracking error:', error.message);
+            }
+        });
+    }
+
+    function sendBeacon(endpoint, data) {
+        if (!navigator.sendBeacon || !isTracking) return false;
+        var payload = Object.assign({}, data, {
+            tracking_code: TRACKING_CODE,
+            session_id: sessionId,
+            page_url: window.location.href,
+            page_title: document.title,
+            timestamp: Date.now()
+        });
+        try {
+            var blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+            return navigator.sendBeacon(API_URL + '?action=' + endpoint, blob);
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function initSession() {
+        sendData('session', {
+            is_new_session: true,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        });
+    }
+
+    function trackPageView() {
+        pageViews++;
+        sendData('pageview', { page_views: pageViews, scroll_depth: 0 });
+    }
+
+    function trackClick(event) {
+        var target = event.target;
+        var rect = target.getBoundingClientRect();
+        sendData('click', {
+            element_tag: target.tagName.toLowerCase(),
+            element_text: (target.textContent || target.innerText || '').substring(0, 100),
+            element_id: target.id || '',
+            element_class: target.className || '',
+            element_href: target.href || '',
+            click_x: event.clientX,
+            click_y: event.clientY,
+            element_x: Math.round(rect.left),
+            element_y: Math.round(rect.top),
+            element_width: Math.round(rect.width),
+            element_height: Math.round(rect.height)
+        });
+    }
+
+    function trackScrollDepth() {
+        var scrollPercent = Math.round((window.scrollY / Math.max(document.body.scrollHeight - window.innerHeight, 1)) * 100);
+        sendData('scroll', { scroll_depth: Math.min(Math.max(scrollPercent, 0), 100) });
+    }
+
+    function trackTimeOnPage() {
+        var timeOnPage = Math.round((Date.now() - startTime) / 1000);
+        sendData('time_on_page', { time_on_page: timeOnPage });
+    }
+
+    function endSession() {
+        var duration = Math.round((Date.now() - startTime) / 1000);
+        var beaconSent = sendBeacon('session_end', { duration: duration, page_views: pageViews });
+        if (!beaconSent) sendData('session_end', { duration: duration, page_views: pageViews });
+    }
+
+    function updateActivity() { lastActivity = Date.now(); }
+    function detectInactivity() {
+        var inactiveTime = Date.now() - lastActivity;
+        if (inactiveTime > 30000) {
+            isTracking = false;
+            setTimeout(function() { isTracking = true; }, 10000);
+        }
+    }
+    function sendHeartbeat() {
+        if (isTracking) sendData('heartbeat', { active_time: Date.now() - lastActivity, current_scroll: window.scrollY });
+    }
+
+    function init() {
+        initSession();
+        trackPageView();
+        document.addEventListener('click', trackClick, true);
+
+        var scrollTimeout, lastScrollDepth = 0;
+        window.addEventListener('scroll', function() {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(function() {
+                var currentDepth = Math.round((window.scrollY / Math.max(document.body.scrollHeight - window.innerHeight, 1)) * 100);
+                if (Math.abs(currentDepth - lastScrollDepth) > 10) {
+                    trackScrollDepth();
+                    lastScrollDepth = currentDepth;
+                }
+            }, 500);
+            updateActivity();
+        }, { passive: true });
+
+        window.addEventListener('focus', updateActivity);
+        window.addEventListener('blur', trackTimeOnPage);
+        window.addEventListener('beforeunload', function() { trackTimeOnPage(); endSession(); });
+        window.addEventListener('pagehide', endSession);
+
+        document.addEventListener('mousemove', updateActivity, { passive: true });
+        document.addEventListener('keypress', updateActivity, { passive: true });
+        document.addEventListener('touchstart', updateActivity, { passive: true });
+
+        setInterval(sendHeartbeat, 60000);
+        setInterval(detectInactivity, 10000);
+    }
+
+    window.analyticsTracker = {
+        trackEvent: function(eventName, eventData) {
+            sendData('custom_event', { event_name: eventName, event_data: eventData || {} });
+        },
+        trackPageView: trackPageView,
+        updateActivity: updateActivity,
+        endSession: endSession
+    };
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
+})();
 </script>
 ```
+
+> Source in project: `classes/WebsiteManager.php` -> `generateTrackingScript()`
 
 #### 4. مراقبة الإحصائيات | Monitoring Statistics
 - انتقل إلى تبويب "التحليلات" | Go to "Analytics" tab
@@ -293,22 +454,14 @@ error_reporting(E_ALL);
 ## 📞 الدعم | Support
 
 ### التواصل | Contact
-- **Email**: support@analytics.com
-- **Documentation**: [docs.analytics.com](https://docs.analytics.com)
-- **Issues**: [GitHub Issues](https://github.com/your-repo/analytics-platform/issues)
+- **Name**: Yousuf Alharbi
+- **Email**: z8@hotmail.com
+- **Website**: [www.youo.info](https://www.youo.info)
 
 ### المساهمة | Contributing
-نرحب بمساهماتكم! يرجى قراءة [CONTRIBUTING.md](CONTRIBUTING.md) للمزيد من التفاصيل.
+يرجى التواصل معنا.
 
-We welcome contributions! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details.
-
----
-
-## 📄 الترخيص | License
-
-هذا المشروع مرخص تحت رخصة MIT - راجع ملف [LICENSE](LICENSE) للتفاصيل.
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Please contact us.
 
 ---
 
@@ -316,7 +469,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Font Awesome للأيقونات | for icons
 - Google Fonts للخطوط | for fonts
-- جميع المساهمين في المشروع | All project contributors
 
 ---
 
@@ -331,9 +483,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**تطوير**: فريق تطوير منصة التحليلات | **Developed by**: Analytics Platform Team
-  
-**المطور**: Youusf Alharbi | **Developer Email**: Z8@Hotmail.Com
+## 👨‍💻 معلومات المطور | Developer Info
+
+- **Developer**: Yousuf Alharbi
+- **Email**: z8@hotmail.com
+- **Website**: [www.youo.info](https://www.youo.info)
 
 **الإصدار**: 1.0.0 | **Version**: 1.0.0
 
