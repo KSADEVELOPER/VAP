@@ -456,7 +456,7 @@ error_reporting(E_ALL);
 ### التواصل | Contact
 - **Name**: Yousuf Alharbi
 - **Email**: z8@hotmail.com
-- **Website**: [www.youo.info](https://www.youo.info)
+- **Website**: [www.Youo.info](https://youo.info)
 
 ### المساهمة | Contributing
 يرجى التواصل معنا.
@@ -487,7 +487,7 @@ Please contact us.
 
 - **Developer**: Yousuf Alharbi
 - **Email**: z8@hotmail.com
-- **Website**: [www.youo.info](https://www.youo.info)
+- **Website**: [www.Youo.info](https://youo.info)
 
 **الإصدار**: 1.0.0 | **Version**: 1.0.0
 
